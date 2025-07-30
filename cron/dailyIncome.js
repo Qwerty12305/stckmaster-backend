@@ -1,5 +1,5 @@
 const cron = require("node-cron");
-const InvestPlan = require("../models/Investplan");
+const InvestPlan = require("../models/InvestPlan");
 
 cron.schedule("30 6 * * *", async () => {
   console.log("Running daily income update cron job at 12:00 PM IST (6:30 AM UTC)");
