@@ -30,5 +30,5 @@ const investPlanSchema = new mongoose.Schema({
   earnedIncome: { type: Number, default: 0 },
 });
 
-module.exports = mongoose.models.InvestPlan || mongoose.model("InvestPlan", investPlanSchema);
+module.exports = mongoose.models.InvestPlan || mongoose.model("Investplan", investPlanSchema);
 
