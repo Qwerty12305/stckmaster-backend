@@ -15,6 +15,9 @@ require("./cron/dailyIncome");
 dotenv.config();
 const app = express();
 
+console.log("Current directory:", __dirname);
+console.log("Files in models dir:", require('fs').readdirSync('./models'));
+
 console.log("Account SID:", process.env.TWILIO_ACCOUNT_SID);
 console.log("Auth Token:", process.env.TWILIO_AUTH_TOKEN);
 console.log("Verify Service SID:", process.env.TWILIO_VERIFY_SERVICE_SID);
