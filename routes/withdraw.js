@@ -12,13 +12,17 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "userId and amount are required." });
     }
 
-    // Get bank details using userId
+    // Find bank for user
     const bank = await Bank.findOne({ userId });
-    const referredBy = await User.findOne({ userId });
     if (!bank) {
       return res.status(404).json({ message: "Bank not found for this user." });
     }
 
+    // Find user to get referredBy
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
 
     const newWithdraw = new Withdraw({
       userId,
@@ -26,7 +30,7 @@ router.post("/", async (req, res) => {
       bankName: bank.bankName,
       account: bank.account,
       ifscCode: bank.ifsc,
-      referredBy: userId.referredBy,
+      referredBy: user.referredBy || null,
       amount,
     });
 
@@ -37,6 +41,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 });
+
 
 //Get full details through userid where user will get withdraw history
 router.get("/:userId", async (req, res) => {
