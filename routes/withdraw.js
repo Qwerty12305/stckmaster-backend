@@ -8,19 +8,17 @@ const User = require("../models/User");
 router.post("/", async (req, res) => {
   try {
     const { userId, amount, bankId } = req.body;
+    console.log("Withdraw request body:", req.body);
 
     if (!userId || !amount || !bankId) {
-      return res.status(400).json({ message: "userId, amount and bankId are required." });
+      return res.status(400).json({ message: "Missing userId, amount or bankId" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(bankId)) {
-      return res.status(400).json({ message: "Invalid bankId." });
-    }
+    const bank = await Bank.findOne({ _id: mongoose.Types.ObjectId(bankId) });
+    console.log("Found bank details:", bank);
 
-    // Find bank by bankId
-    const bank = await Bank.findById(bankId);
     if (!bank) {
-      return res.status(404).json({ message: "Bank details not found." });
+      return res.status(404).json({ message: "Bank details not found" });
     }
 
     const withdraw = new Withdraw({
@@ -34,13 +32,13 @@ router.post("/", async (req, res) => {
     });
 
     await withdraw.save();
-
-    res.status(201).json({ message: "Withdrawal request submitted." });
+    res.status(201).json({ message: "Withdrawal request submitted" });
   } catch (error) {
     console.error("Withdraw Error:", error);
-    res.status(500).json({ message: "Server error." });
+    res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 
