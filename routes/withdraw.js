@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Withdraw = require("../models/Withdraw");
 const Bank = require("../models/Bank");
+const User = require('../models/User');
+
 
 // POST /api/withdraw
 router.post("/", async (req, res) => {
