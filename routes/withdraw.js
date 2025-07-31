@@ -25,11 +25,12 @@ router.post("/", async (req, res) => {
 
     const withdraw = new Withdraw({
       userId,
-      amount,
+     
       customerName: bank.customerName,
-      bankName: bank.account,
+      bankName: bank.bankName,
       ifscCode: bank.ifsc,
-      accountNumber: bank.account,
+      account: bank.account,
+       amount,
       status: "pending",
     });
 
