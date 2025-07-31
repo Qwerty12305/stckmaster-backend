@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
       userId,
       amount,
       customerName: bank.customerName,
-      bankName: bank.bankName,
+      bankName: bank.account,
       ifscCode: bank.ifsc,
       accountNumber: bank.account,
       status: "pending",
