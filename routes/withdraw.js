@@ -8,7 +8,6 @@ const User = require("../models/User");
 router.post("/", async (req, res) => {
   try {
     const { userId, amount, bankId } = req.body;
-    console.log("Withdraw request body:", req.body);
 
     if (!userId || !amount || !bankId) {
       return res.status(400).json({ message: "Missing userId, amount or bankId" });
