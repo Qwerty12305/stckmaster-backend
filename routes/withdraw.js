@@ -10,14 +10,14 @@ const User = require("../models/User"); // ✅ make sure this is imported
 // POST /api/withdraw
 router.post("/", async (req, res) => {
   try {
-    const { userId, amount } = req.body;
+    const { userId, amount, bankId  } = req.body;
 
      if (!userId || !amount || !bankId) {
       return res.status(400).json({ message: "Missing userId or amount" });
     }
 
     // 🔍 Find the user's bank details
-   const bank = await Bank.findById(selectedBank);
+   const bank = await Bank.findById(bankId);
 
 
     if (!bank) {
