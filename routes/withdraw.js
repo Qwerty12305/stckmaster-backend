@@ -17,7 +17,8 @@ router.post("/", async (req, res) => {
     }
 
     // 🔍 Find the user's bank details
-    const bank = await Bank.findById(bankId);
+   const bank = await Bank.findById(selectedBank);
+
 
     if (!bank) {
       return res.status(404).json({ message: "Bank details not found" });
