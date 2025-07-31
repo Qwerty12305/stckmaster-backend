@@ -1,5 +1,5 @@
 const cron = require("node-cron");
-const InvestPlan = require("../models/InvestPlan");
+const Investplan = require("../models/Investplan");
 
 cron.schedule("30 6 * * *", async () => {
   console.log("Running daily income update cron job at 12:00 PM IST (6:30 AM UTC)");
@@ -7,14 +7,12 @@ cron.schedule("30 6 * * *", async () => {
 console.log('Current directory:', __dirname);
 console.log('Files in models dir:', require('fs').readdirSync('./models'));
 
-// Use exact path
-const InvestPlan = require('../models/InvestPlan.js'); // .js extension recommended
 
   try {
     const now = new Date();
 
     // Find active plans whose nextCreditDate is due and creditedDays less than duration
-    const plans = await InvestPlan.find({
+    const plans = await Investplan.find({
       status: "active",
       nextCreditDate: { $lte: now },
       $expr: { $lt: ["$creditedDays", "$duration"] },
@@ -46,7 +44,4 @@ const InvestPlan = require('../models/InvestPlan.js'); // .js extension recommen
   }
 });
 // DEBUGGING
-console.log('Requiring InvestPlan from:', path.resolve(__dirname, '../models/InvestPlan.js'));
-console.log('Directory contents:', fs.readdirSync(path.resolve(__dirname, '../models')));
 
-const InvestPlan = require(path.resolve(__dirname, '../models/InvestPlan.js'));

@@ -2,12 +2,11 @@
     "name":  "backend",
     "version":  "1.0.0",
     "main":  "index.js",
- "scripts": {
-  "start": "node server.js",
-  "prestart": "node scripts/verify-deployment.js",
-  "render-build": "npm install && npm run build",
-  "verify": "node scripts/verify-deployment.js"
-},
+    "scripts":  {
+                    "predeploy":  "node scripts/deploy-verify",
+                    "verify":  "node scripts/deploy-verify",
+                    "start":  "nodemon server.js"
+                },
     "keywords":  [
 
                  ],
