@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const User = require('../models/User');
 const Withdraw = require("../models/Withdraw");
 const Bank = require("../models/Bank");
-const User = require('../models/User');
+
 
 
 // POST /api/withdraw
@@ -11,36 +12,33 @@ router.post("/", async (req, res) => {
     const { userId, amount } = req.body;
 
     if (!userId || !amount) {
-      return res.status(400).json({ message: "userId and amount are required." });
+      return res.status(400).json({ message: "Missing userId or amount" });
     }
 
-    // Find bank for user
+    // 🔍 Find the user's bank details
     const bank = await Bank.findOne({ userId });
+
     if (!bank) {
-      return res.status(404).json({ message: "Bank not found for this user." });
+      return res.status(404).json({ message: "Bank details not found" });
     }
 
-    // Find user to get referredBy
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
-    const newWithdraw = new Withdraw({
+    // 💾 Create and save the withdrawal request
+    const withdraw = new Withdraw({
       userId,
+      amount,
       customerName: bank.customerName,
       bankName: bank.bankName,
-      account: bank.account,
-      ifscCode: bank.ifsc,
-      referredBy: user.referredBy || null,
-      amount,
+      ifscCode: bank.ifscCode,
+      accountNumber: bank.accountNumber,
+      status: "pending", // default
     });
 
-    await newWithdraw.save();
-    res.status(201).json({ message: "Withdraw request saved successfully." });
-  } catch (err) {
-    console.error("Withdraw Error:", err);
-    res.status(500).json({ message: "Server error." });
+    await withdraw.save();
+
+    res.status(201).json({ message: "Withdrawal request submitted" });
+  } catch (error) {
+    console.error("Withdraw Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
