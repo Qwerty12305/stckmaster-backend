@@ -12,12 +12,11 @@ router.post("/", async (req, res) => {
   try {
     const { userId, amount, bankId  } = req.body;
 
-     if (!userId || !amount || !bankId) {
-      return res.status(400).json({ message: "Missing userId or amount" });
-    }
+    const bankAbc = "688ba6ca952cb8e8b29f54ca";
 
-    // 🔍 Find the user's bank details
-   const bank = await Bank.findById(bankId);
+const bank = await Bank.findOne({ _id: mongoose.Types.ObjectId(bankAbc) });
+ 
+
 
 
     if (!bank) {

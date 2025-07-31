@@ -44,6 +44,7 @@ const depositRoute = require("./routes/deposit");
 app.use("/api/deposit", depositRoute);
 app.use('/api', require('./routes/deposit'));
 
+
 const withdrawRoutes = require("./routes/withdraw");
 app.use("/api/withdraw", withdrawRoutes);
 
