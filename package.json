@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
@@ -16,6 +16,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "moment-timezone": "^0.6.0",
     "mongoose": "^8.17.0",
     "nanoid": "^5.1.5",
     "node-cron": "^4.2.1",

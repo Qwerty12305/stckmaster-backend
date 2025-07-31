@@ -1,17 +1,13 @@
 const cron = require("node-cron");
+const moment = require("moment-timezone");
 const Investplan = require("../models/Investplan");
 
+// Schedule the cron job to run daily at 12:30 PM IST (which is 7:00 AM UTC)
 cron.schedule("30 6 * * *", async () => {
-  console.log("Running daily income update cron job at 12:00 PM IST (6:30 AM UTC)");
-  // Add debug logging
-console.log('Current directory:', __dirname);
-console.log('Files in models dir:', require('fs').readdirSync('./models'));
-
-
   try {
     const now = new Date();
 
-    // Find active plans whose nextCreditDate is due and creditedDays less than duration
+    // Find active plans whose nextCreditDate is due and creditedDays < duration
     const plans = await Investplan.find({
       status: "active",
       nextCreditDate: { $lte: now },
@@ -19,7 +15,7 @@ console.log('Files in models dir:', require('fs').readdirSync('./models'));
     });
 
     if (plans.length === 0) {
-      console.log("No plans due for daily income credit today.");
+      console.log("📭 No plans due for daily income credit today.");
       return;
     }
 
@@ -27,8 +23,15 @@ console.log('Files in models dir:', require('fs').readdirSync('./models'));
       plan.earnedIncome += plan.dailyIncome;
       plan.creditedDays += 1;
 
-      // Next credit date: add 24 hours (keep same 12:00 PM IST logic)
-      plan.nextCreditDate = new Date(plan.nextCreditDate.getTime() + 24 * 60 * 60 * 1000);
+      // Set nextCreditDate to next day at 12:00 PM IST
+      plan.nextCreditDate = moment()
+        .tz("Asia/Kolkata")
+        .add(1, "day")
+        .hour(12)
+        .minute(0)
+        .second(0)
+        .millisecond(0)
+        .toDate();
 
       if (plan.creditedDays >= plan.duration) {
         plan.status = "completed";
@@ -38,10 +41,8 @@ console.log('Files in models dir:', require('fs').readdirSync('./models'));
     });
 
     await Promise.all(updatePromises);
-    console.log(`✅ Daily income updated for ${plans.length} plans.`);
+    console.log(`✅ Daily income credited for ${plans.length} plan(s).`);
   } catch (error) {
-    console.error("❌ Error during daily income update cron job:", error);
+    console.error("❌ Error in daily income cron job:", error);
   }
 });
-// DEBUGGING
-
