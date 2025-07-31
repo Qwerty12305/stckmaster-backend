@@ -12,12 +12,12 @@ router.post("/", async (req, res) => {
   try {
     const { userId, amount } = req.body;
 
-    if (!userId || !amount) {
+     if (!userId || !amount || !bankId) {
       return res.status(400).json({ message: "Missing userId or amount" });
     }
 
     // 🔍 Find the user's bank details
-    const bank = await Bank.findOne({ userId });
+    const bank = await Bank.findById(bankId);
 
     if (!bank) {
       return res.status(404).json({ message: "Bank details not found" });
