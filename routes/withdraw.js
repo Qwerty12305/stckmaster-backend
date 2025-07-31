@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const User = require('../models/User');
 const Withdraw = require("../models/Withdraw");
 const Bank = require("../models/Bank");
+const User = require("../models/User"); // ✅ make sure this is imported
+
 
 
 
@@ -28,8 +29,8 @@ router.post("/", async (req, res) => {
       amount,
       customerName: bank.customerName,
       bankName: bank.bankName,
-      ifscCode: bank.ifscCode,
-      accountNumber: bank.accountNumber,
+      ifscCode: bank.ifsc,
+      accountNumber: bank.account,
       status: "pending", // default
     });
 
