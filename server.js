@@ -1,8 +1,5 @@
-require('dotenv').config();  // must be at the very top
 
-console.log("Account SID:", process.env.TWILIO_ACCOUNT_SID);
-console.log("Auth Token:", process.env.TWILIO_AUTH_TOKEN ? "Loaded" : "Missing");
-console.log("Verify Service SID:", process.env.TWILIO_VERIFY_SERVICE_SID);
+
 
 
 const express = require('express');
@@ -14,8 +11,13 @@ const Investplan = require('./models/Investplan');  // adjust path as needed
 require("./cron/dailyIncome");
 dotenv.config();
 const app = express();
+
+
+
 app.use(cors());
 app.use(express.json());
+
+
 const { router: forgotPasswordRoute } = require('./routes/forgotPassword');
 const resetPasswordRoute = require('./routes/resetPassword');
 
@@ -81,4 +83,6 @@ app.use('/api', resetPasswordRoute);
 
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

@@ -1,4 +1,9 @@
-const mongoose = require("mongoose");
+﻿// NEW InvestPlan.js - Verified Working Version
+const mongoose = require('mongoose');
+const path = require('path');
+
+// Debugging
+console.log('InvestPlan model loading from:', path.resolve(__dirname));
 
 const investPlanSchema = new mongoose.Schema({
   userId: { type: String, required: true },
@@ -7,28 +12,15 @@ const investPlanSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   dailyIncome: { type: Number, required: true },
   totalIncome: { type: Number, required: true },
-  duration: { type: Number, required: true }, // days
-  status: { type: String, default: "active" }, // active or completed
+  duration: { type: Number, required: true },
+  status: { type: String, default: 'active' },
   createdAt: { type: Date, default: Date.now },
-  nextCreditDate: {
-    type: Date,
-    default: () => {
-      const now = new Date();
-      // Set nextCreditDate to next day 12:00 PM IST (6:30 AM UTC)
-      const tomorrowNoonIST = new Date(
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate() + 1,
-          6, 30, 0, 0
-        )
-      );
-      return tomorrowNoonIST;
-    },
-  },
+  nextCreditDate: { type: Date, default: () => new Date(Date.now() + 86400000) },
   creditedDays: { type: Number, default: 0 },
-  earnedIncome: { type: Number, default: 0 },
+  earnedIncome: { type: Number, default: 0 }
 });
 
-module.exports = mongoose.models.InvestPlan || mongoose.model("InvestPlan", investPlanSchema);
+const Model = mongoose.models.InvestPlan || mongoose.model('InvestPlan', investPlanSchema);
+console.log('InvestPlan model registered:', Model.modelName);
 
+module.exports = Model;

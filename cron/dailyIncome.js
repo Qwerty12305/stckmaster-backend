@@ -1,14 +1,18 @@
 const cron = require("node-cron");
-const InvestPlan = require("../models/Investplan");
+const InvestPlan = require("../models/InvestPlan");
 
 cron.schedule("30 6 * * *", async () => {
   console.log("Running daily income update cron job at 12:00 PM IST (6:30 AM UTC)");
+  // Add debug logging
+console.log('Current directory:', __dirname);
+console.log('Files in models dir:', require('fs').readdirSync('./models'));
+
 
   try {
     const now = new Date();
 
     // Find active plans whose nextCreditDate is due and creditedDays less than duration
-    const plans = await InvestPlan.find({
+    const plans = await Investplan.find({
       status: "active",
       nextCreditDate: { $lte: now },
       $expr: { $lt: ["$creditedDays", "$duration"] },
@@ -39,3 +43,5 @@ cron.schedule("30 6 * * *", async () => {
     console.error("❌ Error during daily income update cron job:", error);
   }
 });
+// DEBUGGING
+
