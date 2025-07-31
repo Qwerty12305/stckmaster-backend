@@ -14,7 +14,9 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Missing userId, amount or bankId" });
     }
 
-    const bank = await Bank.findOne({ _id: mongoose.Types.ObjectId(bankId) });
+    const bank = await Bank.findOne({ _id: mongoose.Types.ObjectId.createFromHexString(bankId) });
+
+
     console.log("Found bank details:", bank);
 
     if (!bank) {
