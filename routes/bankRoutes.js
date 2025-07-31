@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Bank = require("../models/Bank");
-
+      
 // Add a new bank
-router.post("/", async (req, res) => {
+router.post("/add", async (req, res) => {
   try {
     const { userId, bankName, account, ifsc, customerName } = req.body;
 

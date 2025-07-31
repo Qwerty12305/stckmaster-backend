@@ -1,7 +1,3 @@
-
-
-
-
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -11,6 +7,9 @@ const Investplan = require('./models/Investplan');  // adjust path as needed
 require("./cron/dailyIncome");
 dotenv.config();
 const app = express();
+app.get('/', (req, res) => {
+  res.send('API is running!');
+});
 
 
 
