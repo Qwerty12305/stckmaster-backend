@@ -1,29 +1,28 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");  // <--- import mongoose
 const Withdraw = require("../models/Withdraw");
 const Bank = require("../models/Bank");
-const User = require("../models/User"); // ✅ make sure this is imported
+const User = require("../models/User");
 
-
-
-
-// POST /api/withdraw
 router.post("/", async (req, res) => {
   try {
-    const { userId, amount, bankId  } = req.body;
+    const { userId, amount, bankId } = req.body;
 
-    const bankAbc = "688ba6ca952cb8e8b29f54ca";
-
-const bank = await Bank.findOne({ _id: mongoose.Types.ObjectId(bankAbc) });
- 
-
-
-
-    if (!bank) {
-      return res.status(404).json({ message: "Bank details not found" });
+    if (!userId || !amount || !bankId) {
+      return res.status(400).json({ message: "userId, amount and bankId are required." });
     }
 
-    // 💾 Create and save the withdrawal request
+    if (!mongoose.Types.ObjectId.isValid(bankId)) {
+      return res.status(400).json({ message: "Invalid bankId." });
+    }
+
+    // Find bank by bankId
+    const bank = await Bank.findById(bankId);
+    if (!bank) {
+      return res.status(404).json({ message: "Bank details not found." });
+    }
+
     const withdraw = new Withdraw({
       userId,
       amount,
@@ -31,17 +30,18 @@ const bank = await Bank.findOne({ _id: mongoose.Types.ObjectId(bankAbc) });
       bankName: bank.bankName,
       ifscCode: bank.ifsc,
       accountNumber: bank.account,
-      status: "pending", // default
+      status: "pending",
     });
 
     await withdraw.save();
 
-    res.status(201).json({ message: "Withdrawal request submitted" });
+    res.status(201).json({ message: "Withdrawal request submitted." });
   } catch (error) {
     console.error("Withdraw Error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error." });
   }
 });
+
 
 
 //Get full details through userid where user will get withdraw history
