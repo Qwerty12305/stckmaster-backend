@@ -15,7 +15,19 @@ const investPlanSchema = new mongoose.Schema({
   duration: { type: Number, required: true },
   status: { type: String, default: 'active' },
   createdAt: { type: Date, default: Date.now },
-  nextCreditDate: { type: Date, default: () => new Date(Date.now() + 86400000) },
+  nextCreditDate: { 
+    type: Date, 
+    default: () => {
+      const moment = require('moment-timezone');
+      return moment()
+        .tz('Asia/Kolkata')
+        .startOf('day')
+        .add(1, 'day')
+        .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
+        .utc()
+        .toDate();
+    } 
+  },
   creditedDays: { type: Number, default: 0 },
   earnedIncome: { type: Number, default: 0 }
 });
