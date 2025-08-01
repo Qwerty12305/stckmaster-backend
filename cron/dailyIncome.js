@@ -24,14 +24,12 @@ cron.schedule("30 6 * * *", async () => {
       plan.creditedDays += 1;
 
       // Set nextCreditDate to next day at 12:00 PM IST
-      plan.nextCreditDate = moment()
-        .tz("Asia/Kolkata")
-        .add(1, "day")
-        .hour(12)
-        .minute(0)
-        .second(0)
-        .millisecond(0)
-        .toDate();
+      plan.nextCreditDate = moment(plan.nextCreditDate)
+  .tz("Asia/Kolkata")
+  .add(1, "day")
+  .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
+  .utc() // convert back to UTC for saving
+  .toDate();
 
       if (plan.creditedDays >= plan.duration) {
         plan.status = "completed";
