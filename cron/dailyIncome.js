@@ -25,11 +25,12 @@ cron.schedule("30 6 * * *", async () => {
 
       // Set nextCreditDate to next day at 12:00 PM IST
       plan.nextCreditDate = moment(plan.nextCreditDate)
-  .tz("Asia/Kolkata")
-  .add(1, "day")
-  .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
-  .utc() // convert back to UTC for saving
-  .toDate();
+        .tz("Asia/Kolkata")
+        .startOf("day")
+        .add(1, "day")
+        .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
+        .utc()
+        .toDate();
 
       if (plan.creditedDays >= plan.duration) {
         plan.status = "completed";
