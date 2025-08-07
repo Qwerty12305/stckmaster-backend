@@ -68,9 +68,7 @@ router.get("/earnings/:userId", async (req, res) => {
       rewardDetails,
       userDetails: {
     name: user.name,
-    email: user.email,
-    phone: user.phone,
-    joinedAt: user.createdAt,
+    mobile: user.mobile,
   },
     });
 
