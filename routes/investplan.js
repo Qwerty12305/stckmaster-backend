@@ -92,7 +92,48 @@ router.get("/summary/:userId", async (req, res) => {
     res.status(500).json({ message: "Error fetching investment summary" });
   }
 });
+//for admin panel summary
+router.get("/summaryAdmin/:userId", async (req, res) => {
+  const { userId } = req.params;
 
+  try {
+    // Fetch all active plans for this user, sorted by newest first
+    const plans = await Investplan.find({ userId, status: "active" }).sort({ createdAt: -1 });
+
+    if (!plans || plans.length === 0) {
+      return res.status(404).json({ message: "No active plans found for this user." });
+    }
+
+    // Aggregate summary fields
+    let dailyIncome = 0;
+    let totalIncome = 0;
+    let earnedIncome = 0;
+    let creditedDays = 0;
+    let duration = 0;
+
+    plans.forEach(plan => {
+      dailyIncome += plan.dailyIncome || 0;
+      totalIncome += plan.totalIncome || 0;
+      earnedIncome += plan.earnedIncome || 0;
+      creditedDays += plan.creditedDays || 0;
+      duration += plan.duration || 0;
+    });
+
+    const summary = {
+      dailyIncome,
+      totalIncome,
+      earnedIncome,
+      remainingIncome: totalIncome - earnedIncome,
+      creditedDays,
+      remainingDays: duration - creditedDays,
+    };
+
+    res.json({ summary, plans });
+  } catch (error) {
+    console.error("Error fetching invested plans summary:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 
 
