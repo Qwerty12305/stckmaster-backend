@@ -101,6 +101,61 @@ router.get("/team/:userId", async (req, res) => {
   }
 });
 
+//admin Team Table\
+router.get("/adminTeam/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // 1. Get the main user’s referral code
+    const referrer = await User.findById(userId);
+    if (!referrer) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const referralCode = referrer.referralCode;
+
+    // 2. Get all users who were referred by this code
+    const members = await User.find({ referredBy: referralCode });
+
+    // 3. Build response with deposit info
+    const teamMembers = await Promise.all(
+      members.map(async (member) => {
+        const deposits = await Deposit.find({ userId: member._id });
+
+        const depositData = deposits.map((dep) => {
+          const rewardPercent = 5;
+          const earning = (dep.amount * rewardPercent) / 100;
+
+          return {
+            _id: dep._id,
+            amount: dep.amount,
+            rewardPercent,
+            earning,
+          };
+        });
+
+        return {
+          _id: member._id,
+          name: member.name,
+          mobile: member.mobile,
+          userId: member.userId,
+          deposits: depositData,
+        };
+      })
+    );
+
+    // 4. Send structured response
+    res.json({
+      referralCode,
+      teamSize: teamMembers.length,
+      members: teamMembers,
+    });
+  } catch (err) {
+    console.error("Error fetching team info:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 
 module.exports = router;
