@@ -65,7 +65,13 @@ router.get("/earnings/:userId", async (req, res) => {
       totalReferredUsers: deposits.length,
       totalReferredAmount: deposits.reduce((acc, d) => acc + d.amount, 0),
       totalEarnings: parseFloat(totalEarnings.toFixed(2)),
-      rewardDetails
+      rewardDetails,
+      userDetails: {
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    joinedAt: user.createdAt,
+  },
     });
 
   } catch (error) {
