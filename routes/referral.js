@@ -100,20 +100,20 @@ router.get("/team/:userId", async (req, res) => {
 });
 
 //admin Team Table\
-const getTeamWithDeposits = async (req, res) => {
+router.get("/summaryAdmin/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // 1. Get the referral code of this user
+    // Step 1: Get the referral code of this user
     const referrer = await User.findOne({ userId });
     if (!referrer) return res.status(404).json({ error: "User not found" });
 
     const referralCode = referrer.referralCode;
 
-    // 2. Find users who used this referral code
+    // Step 2: Find users who used this referral code
     const referredUsers = await User.find({ referredBy: referralCode });
 
-    // 3. For each referred user, fetch their successful deposits
+    // Step 3: For each referred user, fetch their successful deposits
     const team = await Promise.all(
       referredUsers.map(async (user) => {
         const successfulDeposits = await Deposit.find({
@@ -121,9 +121,8 @@ const getTeamWithDeposits = async (req, res) => {
           status: "success",
         });
 
-        if (successfulDeposits.length === 0) return null; // Skip if no success deposits
+        if (successfulDeposits.length === 0) return null; // Skip users with no success deposits
 
-        // Map deposit info with reward calculation
         const deposits = successfulDeposits.map((dep) => {
           const rewardPercent = 5;
           const earning = (dep.amount * rewardPercent) / 100;
@@ -147,7 +146,6 @@ const getTeamWithDeposits = async (req, res) => {
       })
     );
 
-    // Filter out nulls (users with no successful deposits)
     const filteredTeam = team.filter((member) => member !== null);
 
     res.json({
@@ -160,7 +158,7 @@ const getTeamWithDeposits = async (req, res) => {
     console.error("Error fetching team info:", err);
     res.status(500).json({ error: "Server error" });
   }
-};
+});
 
 
 module.exports = router;
