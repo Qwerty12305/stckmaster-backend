@@ -51,18 +51,19 @@ router.get("/plans/:userId", async (req, res) => {
 
 // GET /api/invest/summary/:userId
 // ✅ Summary route for user
+
 router.get("/summary/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Get all plans for the user
-    const plans = await Investplan.find({ userId });
+    // Find all active plans for the user
+    const plans = await Investplan.find({ userId, status: "active" });
 
     if (!plans || plans.length === 0) {
-      return res.status(404).json({ message: "No investments found for this user." });
+      return res.status(404).json({ message: "No active investments found for this user." });
     }
 
-    // Summarize data over all plans (not just active)
+    // Summarize data
     let dailyIncome = 0;
     let totalIncome = 0;
     let earnedIncome = 0;
@@ -70,34 +71,27 @@ router.get("/summary/:userId", async (req, res) => {
     let duration = 0;
 
     plans.forEach(plan => {
-      dailyIncome += plan.dailyIncome || 0;
-      totalIncome += plan.totalIncome || 0;
-      earnedIncome += plan.earnedIncome || 0;
-      creditedDays += plan.creditedDays || 0;
-      duration += plan.duration || 0;
+      dailyIncome += plan.dailyIncome;
+      totalIncome += plan.totalIncome;
+      earnedIncome += plan.earnedIncome;
+      creditedDays += plan.creditedDays;
+      duration += plan.duration;
     });
 
-    const summary = {
+    res.json({
       dailyIncome,
       totalIncome,
       earnedIncome,
       remainingIncome: totalIncome - earnedIncome,
       creditedDays,
       remainingDays: duration - creditedDays,
-    };
-
-    // Send full response: calculated summary + full list of plans
-    res.json({
-      summary,
-      plans, // includes status for each
+      status: "active"
     });
-
   } catch (error) {
     console.error("Error in summary route:", error);
     res.status(500).json({ message: "Error fetching investment summary" });
   }
 });
-
 
 
 
