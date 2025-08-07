@@ -3,18 +3,6 @@ const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-      const now = new Date();
-
-const tomorrowNoonIST = new Date(
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate() + 1,
-          6, 30, 0, 0
-        )
-      );
-
-console.log("🕒 Current IST Time:", tomorrowNoonIST);
 
 
 router.post('/signin', async (req, res) => {
@@ -35,6 +23,11 @@ router.post('/signin', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // ✅ Check if user status is "active"
+    if (user.status !== 'active') {
+      return res.status(403).json({ message: 'Your account is deactivated. Please contact support.' });
+    }
+
     res.status(200).json({
       message: '✅ Login successful',
       userId: user.userId,
@@ -45,5 +38,6 @@ router.post('/signin', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 module.exports = router;
