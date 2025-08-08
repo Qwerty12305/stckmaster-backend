@@ -34,6 +34,49 @@ router.get("/:userId", async (req, res) => {
   res.json(banks);
 });
 
+//delete bank details
+router.delete("/delete/:bankId", async (req, res) => {
+  try {
+    const { bankId } = req.params;
+
+    const deletedBank = await Bank.findByIdAndDelete(bankId);
+
+    if (!deletedBank) {
+      return res.status(404).json({ message: "Bank record not found" });
+    }
+
+    res.json({ message: "Bank deleted successfully", bank: deletedBank });
+  } catch (error) {
+    console.error("Error deleting bank:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// update bank record
+// UPDATE bank
+router.put("/update/:bankId", async (req, res) => {
+  try {
+    const { bankId } = req.params;
+    const { customerName, bankName, account, ifsc } = req.body;
+
+    const updatedBank = await Bank.findByIdAndUpdate(
+      bankId,
+      { customerName, bankName, account, ifsc },
+      { new: true }
+    );
+
+    if (!updatedBank) {
+      return res.status(404).json({ message: "Bank record not found" });
+    }
+
+    res.json({ message: "Bank updated successfully", bank: updatedBank });
+  } catch (error) {
+    console.error("Error updating bank:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 
 
 
