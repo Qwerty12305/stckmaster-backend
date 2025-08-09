@@ -100,7 +100,7 @@ router.get("/team/:userId", async (req, res) => {
 });
 
 //admin Team Table\
-router.get("/summaryAdmin/:userId", async (req, res) => {
+router.get("/teamCalculationAdmin/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -162,3 +162,17 @@ router.get("/summaryAdmin/:userId", async (req, res) => {
 
 
 module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+

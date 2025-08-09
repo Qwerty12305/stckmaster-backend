@@ -39,7 +39,7 @@ router.post('/verify-otp', async (req, res) => {
   }
 
   try {
-    console.log('Using verifySid:', verifySid);
+    
 
     const verification = await client.verify.v2.services(verifySid)
       .verificationChecks

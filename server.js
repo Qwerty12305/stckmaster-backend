@@ -4,6 +4,9 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const cron = require('node-cron');
 const Investplan = require('./models/Investplan');  // adjust path as needed
+const paymentMethodRoutes = require("./routes/paymentRoutes"); // your new routes file
+const path = require("path");
+
 require("./cron/dailyIncome");
 dotenv.config();
 const app = express();
@@ -22,6 +25,7 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use("/uploads/qr_codes", express.static(path.join(__dirname, "uploads/qr_codes")));
 
 const { router: forgotPasswordRoute } = require('./routes/forgotPassword');
 const resetPasswordRoute = require('./routes/resetPassword');
@@ -77,6 +81,8 @@ const investRoutes = require("./routes/investplan");
 app.use("/api/invest", investRoutes); // Now you can call /api/invest/total/:userId
 
 
+app.use("/api/payment-methods", paymentMethodRoutes);
+
 
 
 
@@ -84,6 +90,18 @@ app.use('/api', forgotPasswordRoute);
 app.use('/api', resetPasswordRoute);
 
 
+
+//admin all route
+const adminAuthRoutes = require('./routes/adminAuth');
+app.use('/api/admin', adminAuthRoutes);
+
+const adminStatsRoutes = require('./routes/adminStats');  // adjust path
+app.use('/api/admin-stats', adminStatsRoutes);
+
+const subPlanRouter = require('./routes/subPlan');
+
+// Mount the router at /api/sub-plan
+app.use('/api/sub-plan', subPlanRouter);
 
 
 
