@@ -37,7 +37,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 
   app.post('/api/test-body', (req, res) => {
-  console.log('Request body:', req.body);
+  //console.log('Request body:', req.body);
   res.json({ receivedBody: req.body });
 });
 
