@@ -104,6 +104,10 @@ const subPlanRouter = require('./routes/subPlan');
 app.use('/api/sub-plan', subPlanRouter);
 
 
+const changePasswordRoutes = require("./routes/changepassword"); // adjust path if needed
+app.use("/api/", changePasswordRoutes);
+
+
 
 
 const PORT = process.env.PORT || 5000;
