@@ -7,7 +7,8 @@ const Investplan = require('./models/Investplan');  // adjust path as needed
 const paymentMethodRoutes = require("./routes/paymentRoutes"); // your new routes file
 const path = require("path");
 
-require("./cron/dailyIncome");
+const startDailyIncomeCron = require("./cron/dailyIncome"); 
+
 dotenv.config();
 const app = express();
 app.get('/', (req, res) => {
@@ -31,15 +32,12 @@ const { router: forgotPasswordRoute } = require('./routes/forgotPassword');
 const resetPasswordRoute = require('./routes/resetPassword');
 
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected'))
+  .then(() => {
+    console.log('✅ MongoDB connected');
+    startDailyIncomeCron(); // Start cron AFTER DB connect
+  })
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
-
-
-  app.post('/api/test-body', (req, res) => {
-  //console.log('Request body:', req.body);
-  res.json({ receivedBody: req.body });
-});
 
 const authRoutes = require("./routes/auth");
 app.use("/api/user", authRoutes);

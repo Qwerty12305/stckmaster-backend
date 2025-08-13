@@ -1,9 +1,5 @@
-﻿// NEW InvestPlan.js - Verified Working Version
-const mongoose = require('mongoose');
-const path = require('path');
-
-// Debugging
-console.log('InvestPlan model loading from:', path.resolve(__dirname));
+﻿const mongoose = require('mongoose');
+const moment = require('moment-timezone');
 
 const investPlanSchema = new mongoose.Schema({
   userId: { type: String, required: true },
@@ -15,24 +11,19 @@ const investPlanSchema = new mongoose.Schema({
   duration: { type: Number, required: true },
   status: { type: String, default: 'active' },
   createdAt: { type: Date, default: Date.now },
-  nextCreditDate: { 
-    type: Date, 
-    default: () => {
-      const moment = require('moment-timezone');
-      return moment()
-        .tz('Asia/Kolkata')
-        .startOf('day')
-        .add(1, 'day')
-        .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
-        .utc()
-        .toDate();
-    } 
-  },
+  nextCreditDate: {
+  type: Date,
+  default: () => moment().tz('Asia/Kolkata')
+    .startOf('day')          // today 00:00 IST
+    .add(1, 'day')           // tomorrow 00:00 IST
+    .set({ hour: 12 })       // tomorrow 12:00 PM IST
+    .minute(0).second(0).millisecond(0)
+    .toDate()
+},
   creditedDays: { type: Number, default: 0 },
   earnedIncome: { type: Number, default: 0 }
 });
 
-const Model = mongoose.models.InvestPlan || mongoose.model('InvestPlan', investPlanSchema);
-console.log('InvestPlan model registered:', Model.modelName);
+const InvestPlan = mongoose.models.InvestPlan || mongoose.model('InvestPlan', investPlanSchema);
 
-module.exports = Model;
+module.exports = InvestPlan;

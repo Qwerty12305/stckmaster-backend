@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   userId: { type: String, unique: true }, // 6-digit ID (e.g., 245612)
   status: { type: String, default: "active" },
   referralCode: { type: String },      // Add this
+  createdAt: { type: Date, default: Date.now },
   referredBy: { type: String, default: null }  // Add this
 });
 
