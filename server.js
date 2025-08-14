@@ -9,6 +9,10 @@ const path = require("path");
 
 const startDailyIncomeCron = require("./cron/dailyIncome"); 
 
+
+
+
+
 dotenv.config();
 const app = express();
 app.get('/', (req, res) => {
@@ -42,6 +46,9 @@ mongoose.connect(process.env.MONGO_URI)
 const authRoutes = require("./routes/auth");
 app.use("/api/user", authRoutes);
 
+
+const marketRoutes = require('./routes/market');
+app.use("/api/market", marketRoutes);
 
 
 
