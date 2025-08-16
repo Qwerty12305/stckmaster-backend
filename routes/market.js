@@ -1,45 +1,30 @@
 const express = require("express");
-const fetch = require("node-fetch"); // v2 works with require
+const fetch = require("node-fetch");
 const router = express.Router();
 
-const API_KEY = "1a94f12ee8d841fbb5ad2487b2915e4c";
+const API_KEY = process.env.TWELVE_API_KEY;
 
-// Fetch current price
-router.get("/price", async (req, res) => {
-  const symbol = req.query.symbol;
+const markets = ["AAPL", "EUR/USD", "BTC/USD", "XAU/USD", "DAX", "AEX"]; // add all symbols
+
+router.get("/all", async (req, res) => {
   try {
-    const response = await fetch(
-      `https://api.twelvedata.com/price?symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`
+    const results = await Promise.all(
+      markets.map(async (symbol) => {
+        const response = await fetch(
+          `https://api.twelvedata.com/price?symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`
+        );
+        const data = await response.json();
+        return {
+          symbol,
+          price: data.price || null,
+        };
+      })
     );
-    const data = await response.json();
-    if (data.price) {
-      res.json({ price: data.price });
-    } else {
-      res.status(500).json({ error: "Failed to fetch market data" });
-    }
+
+    res.json(results);
   } catch (err) {
-    console.error("Price fetch error:", err);
+    console.error("Failed to fetch all market prices:", err);
     res.status(500).json({ error: "Failed to fetch market data" });
-  }
-});
-
-// Fetch chart data
-router.get("/chart", async (req, res) => {
-  const symbol = req.query.symbol;
-  const interval = req.query.interval || "1min";
-  try {
-    const response = await fetch(
-      `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&apikey=${API_KEY}`
-    );
-    const data = await response.json();
-    if (data.values) {
-      res.json({ values: data.values });
-    } else {
-      res.status(500).json({ error: "Failed to fetch chart data" });
-    }
-  } catch (err) {
-    console.error("Chart fetch error:", err);
-    res.status(500).json({ error: "Failed to fetch chart data" });
   }
 });
 
