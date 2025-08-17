@@ -47,8 +47,6 @@ const authRoutes = require("./routes/auth");
 app.use("/api/user", authRoutes);
 
 
-const marketRoutes = require('./routes/market');
-app.use("/api/market", marketRoutes);
 
 
 
