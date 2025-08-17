@@ -59,8 +59,17 @@ router.get("/summary/:userId", async (req, res) => {
     // Find all active plans for the user
     const plans = await Investplan.find({ userId, status: "active" });
 
+    // If no active plans, return zeros instead of 404
     if (!plans || plans.length === 0) {
-      return res.status(404).json({ message: "No active investments found for this user." });
+      return res.json({
+        dailyIncome: 0,
+        totalIncome: 0,
+        earnedIncome: 0,
+        remainingIncome: 0,
+        creditedDays: 0,
+        remainingDays: 0,
+        status: "active"
+      });
     }
 
     // Summarize data
@@ -92,6 +101,7 @@ router.get("/summary/:userId", async (req, res) => {
     res.status(500).json({ message: "Error fetching investment summary" });
   }
 });
+
 //for admin panel summary
 router.get("/summaryAdmin/:userId", async (req, res) => {
   const { userId } = req.params;
