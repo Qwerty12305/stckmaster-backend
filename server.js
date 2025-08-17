@@ -25,7 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use(cors({
-  origin: ['http://localhost:5174', 'https://your-frontend.com'],
+  origin: ['http://localhost:5173', 'https://your-frontend.com'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
 }));
