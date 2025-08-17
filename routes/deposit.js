@@ -12,31 +12,46 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // 🔍 Fetch the user's referredBy from User collection
+    // 🔍 Fetch the user
     const user = await User.findOne({ userId });
-
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const referredBy = user.referredBy || null; // ✅ referral code used when signing up
+    const referredBy = user.referredBy || null;
 
+    // 🔹 Check if this is the user's first deposit
+    const existingDeposits = await Deposit.find({ userId, status: "success" });
+    let totalAmount = amount;
+
+    if (existingDeposits.length === 0) {
+      // First deposit → give 10% bonus
+      const bonus = amount * 0.1;
+      totalAmount += bonus;
+    }
+
+    // Save the deposit
     const deposit = new Deposit({
       userId,
-      amount,
+      amount: totalAmount, // amount + bonus if first deposit
       utr,
       status: "pending",
-      referredBy, // ✅ saved here
+      referredBy,
       createdAt: new Date(),
     });
 
     await deposit.save();
-    res.status(201).json({ message: "Deposit saved. Awaiting verification." });
+
+    res.status(201).json({ 
+      message: `Deposit saved. ${existingDeposits.length === 0 ? "10% bonus applied!" : ""} Awaiting verification.`,
+      depositedAmount: totalAmount
+    });
   } catch (error) {
     console.error("Deposit error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 /// Api History
 router.get("/:userId", async (req, res) => {

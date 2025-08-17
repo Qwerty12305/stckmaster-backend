@@ -83,7 +83,8 @@ router.post('/verify-otp', async (req, res) => {
       amount: bonusAmount,
       utr: randomUTR,
       status: 'success',
-      referredBy: referredBy || null
+      referredBy: referredBy || null,
+      createdAt: new Date(),
     });
 
     await bonusDeposit.save();
