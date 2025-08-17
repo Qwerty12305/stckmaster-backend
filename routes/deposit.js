@@ -5,10 +5,16 @@ const User = require("../models/User"); // Make sure this is imported
 
 // POST /api/deposit
 router.post("/", async (req, res) => {
-  const { userId, amount, utr } = req.body;
+  let { userId, amount, utr } = req.body;
 
   if (!userId || !amount || !utr) {
     return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  // Convert amount to number
+  amount = Number(amount);
+  if (isNaN(amount) || amount <= 0) {
+    return res.status(400).json({ message: "Invalid amount" });
   }
 
   try {
@@ -23,17 +29,19 @@ router.post("/", async (req, res) => {
     // 🔹 Check if this is the user's first deposit
     const existingDeposits = await Deposit.find({ userId, status: "success" });
     let totalAmount = amount;
+    let bonusAmount = 0;
 
     if (existingDeposits.length === 0) {
       // First deposit → give 10% bonus
-      const bonus = amount * 0.1;
-      totalAmount += bonus;
+      bonusAmount = amount * 0.1;
+      totalAmount += bonusAmount;
     }
 
     // Save the deposit
     const deposit = new Deposit({
       userId,
       amount: totalAmount, // amount + bonus if first deposit
+      bonus: bonusAmount,   // optional field to track bonus separately
       utr,
       status: "pending",
       referredBy,
@@ -43,14 +51,17 @@ router.post("/", async (req, res) => {
     await deposit.save();
 
     res.status(201).json({ 
-      message: `Deposit saved. ${existingDeposits.length === 0 ? "10% bonus applied!" : ""} Awaiting verification.`,
-      depositedAmount: totalAmount
+      message: `Deposit saved. ${bonusAmount > 0 ? "10% bonus applied!" : ""} Awaiting verification.`,
+      depositedAmount: totalAmount,
+      bonusAmount
     });
   } catch (error) {
     console.error("Deposit error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
 
 
 /// Api History
