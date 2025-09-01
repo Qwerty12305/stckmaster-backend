@@ -13,6 +13,7 @@ const startDailyIncomeCron = require("./cron/dailyIncome");
 
 
 
+
 dotenv.config();
 const app = express();
 app.get('/', (req, res) => {
@@ -47,7 +48,8 @@ const authRoutes = require("./routes/auth");
 app.use("/api/user", authRoutes);
 
 
-
+const otpRoutes = require("./routes/otp");
+app.use("/api/otp", otpRoutes);
 
 
 const signinRoute = require('./routes/signin');
