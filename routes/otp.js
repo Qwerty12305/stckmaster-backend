@@ -6,6 +6,9 @@ const AUTH_TOKEN = process.env.MESSAGECENTRAL_AUTH_TOKEN;
 const CUSTOMER_ID = process.env.MESSAGECENTRAL_CUSTOMER_ID;
 
 // Send OTP
+console.log('AUTH_TOKEN:', process.env.MESSAGECENTRAL_AUTH_TOKEN);
+console.log('CUSTOMER_ID:', process.env.MESSAGECENTRAL_CUSTOMER_ID);
+
 router.post('/send-otp', async (req, res) => {
   const { mobileNumber, countryCode } = req.body;
 
