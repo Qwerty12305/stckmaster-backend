@@ -1,13 +1,16 @@
+require('dotenv').config();
 const express = require("express");
 const axios = require("axios");
+const bcrypt = require("bcryptjs");
 const router = express.Router();
+const User = require("../models/User"); // Make sure your User model exists
 
 const AUTH_TOKEN = process.env.MESSAGECENTRAL_AUTH_TOKEN;
 const CUSTOMER_ID = process.env.MESSAGECENTRAL_CUSTOMER_ID;
 
-// Debug logs (optional)
-console.log("AUTH_TOKEN:", AUTH_TOKEN ? "Loaded ✅" : "Missing ❌");
-console.log("CUSTOMER_ID:", CUSTOMER_ID || "Missing ❌");
+if (!AUTH_TOKEN || !CUSTOMER_ID) {
+  console.warn("⚠️ MESSAGECENTRAL_AUTH_TOKEN or CUSTOMER_ID missing!");
+}
 
 // --------------------- SEND OTP ---------------------
 router.post("/send-otp", async (req, res) => {
@@ -24,45 +27,82 @@ router.post("/send-otp", async (req, res) => {
       { headers: { authToken: AUTH_TOKEN } }
     );
 
-    // If OTP request already exists
-    if (response.data.responseCode === "506") {
-      return res.json({
-        verificationId: response.data.data.verificationId,
-        mobileNumber: response.data.data.mobileNumber,
+    const { responseCode, data } = response.data;
+
+    if (responseCode === "506") {
+      return res.status(200).json({
+        verificationId: data.verificationId,
+        mobileNumber: data.mobileNumber,
         message: "OTP already sent. Use existing OTP or wait for timeout.",
-        timeout: response.data.data.timeout,
+        timeout: data.timeout,
       });
     }
 
-    res.json({
-      verificationId: response.data.data.verificationId,
-      mobileNumber: response.data.data.mobileNumber,
+    return res.status(200).json({
+      verificationId: data.verificationId,
+      mobileNumber: data.mobileNumber,
       message: "OTP Sent ✅",
     });
   } catch (error) {
     console.error("Send OTP error:", error.response?.data || error.message);
-    res.status(500).json({ error: error.response?.data || error.message });
+    return res.status(500).json({ error: error.response?.data || "Failed to send OTP" });
   }
 });
 
-// --------------------- VERIFY OTP ---------------------
+// --------------------- VERIFY OTP & SIGNUP ---------------------
 router.post("/verify-otp", async (req, res) => {
-  const { mobileNumber, countryCode, verificationId, code } = req.body;
+  const { mobileNumber, countryCode, verificationId, code, name, password, referredBy } = req.body;
 
-  if (!mobileNumber || !countryCode || !verificationId || !code) {
+  if (!mobileNumber || !countryCode || !verificationId || !code || !name || !password) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
   try {
+    // Verify OTP with MessageCentral
     const response = await axios.get(
       `https://cpaas.messagecentral.com/verification/v3/validateOtp?countryCode=${countryCode}&mobileNumber=${mobileNumber}&verificationId=${verificationId}&customerId=${CUSTOMER_ID}&code=${code}`,
       { headers: { authToken: AUTH_TOKEN } }
     );
 
-    res.json(response.data);
+    const { responseCode } = response.data;
+
+    if (responseCode !== "200") {
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ mobile: mobileNumber });
+    if (existingUser) {
+      return res.status(400).json({ error: "Mobile number already registered" });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generate userId & referralCode
+    const userId = Math.floor(100000 + Math.random() * 900000).toString();
+    const referralCode = name.substring(0, 4).toUpperCase() + mobileNumber.slice(-4);
+
+    // Create new user
+    const newUser = new User({
+      name,
+      mobile: mobileNumber,
+      password: hashedPassword,
+      userId,
+      referralCode,
+      referredBy: referredBy || null
+    });
+
+    await newUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "✅ OTP verified and signup successful",
+      userId,
+    });
   } catch (err) {
-    console.error("Verify OTP error:", err.response?.data || err.message);
-    res.status(500).json({ error: err.response?.data || err.message });
+    console.error("Verify OTP & Signup error:", err.response?.data || err.message);
+    return res.status(500).json({ error: err.response?.data || "OTP verification/signup failed" });
   }
 });
 
