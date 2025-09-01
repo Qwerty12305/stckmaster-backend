@@ -31,6 +31,10 @@ app.use(cors({
   credentials: true,
 }));
 
+console.log("Auth token:", process.env.MESSAGECENTRAL_AUTH_TOKEN?.slice(0,5) + "...");
+console.log("Customer ID:", process.env.MESSAGECENTRAL_CUSTOMER_ID);
+
+
 app.use("/uploads/qr_codes", express.static(path.join(__dirname, "uploads/qr_codes")));
 
 const { router: forgotPasswordRoute } = require('./routes/forgotPassword');
