@@ -58,6 +58,9 @@ router.post("/send-otp-withdrawal", async (req, res) => {
 });
 
 // --------------------- VERIFY OTP & SUBMIT WITHDRAWAL ---------------------
+
+
+
 router.post("/", async (req, res) => {
   try {
     const { userId, amount, bankId, code, verificationId } = req.body;
@@ -71,13 +74,13 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ message: "User or mobile not found" });
     }
 
-    // Verify OTP via MessageCentral
+    // Verify OTP via MessageCentral with country code 91
     const otpResponse = await axios.get(
-      `https://cpaas.messagecentral.com/verification/v3/validateOtp?countryCode=${COUNTRY_CODE}&mobileNumber=${user.mobile}&verificationId=${verificationId}&customerId=${CUSTOMER_ID}&code=${code}`,
+      `https://cpaas.messagecentral.com/verification/v3/validateOtp?countryCode=91&mobileNumber=${user.mobile}&verificationId=${verificationId}&customerId=${CUSTOMER_ID}&code=${code}`,
       { headers: { authToken: AUTH_TOKEN } }
     );
 
-    const { responseCode, data, message } = otpResponse.data;
+    const { responseCode, data } = otpResponse.data;
 
     if (responseCode !== 200 || data?.verificationStatus !== "VERIFICATION_COMPLETED") {
       return res.status(400).json({ message: "Invalid or expired OTP" });
@@ -107,6 +110,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 });
+
 
 // --------------------- GET USER WITHDRAWAL HISTORY ---------------------
 router.get("/:userId", async (req, res) => {
