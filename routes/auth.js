@@ -49,7 +49,7 @@ router.post("/send-otp", async (req, res) => {
       verificationId: data.verificationId,
       mobileNumber: data.mobileNumber,
       message: "OTP Sent ✅",
-      timeout: 60
+      timeout: 300
     });
 
   } catch (err) {
