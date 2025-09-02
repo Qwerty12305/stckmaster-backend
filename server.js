@@ -31,8 +31,7 @@ app.use(cors({
   credentials: true,
 }));
 
-console.log("Auth token:", process.env.MESSAGECENTRAL_AUTH_TOKEN?.slice(0,5) + "...");
-console.log("Customer ID:", process.env.MESSAGECENTRAL_CUSTOMER_ID);
+
 
 
 app.use("/uploads/qr_codes", express.static(path.join(__dirname, "uploads/qr_codes")));
@@ -52,12 +51,14 @@ const authRoutes = require("./routes/auth");
 app.use("/api/user", authRoutes);
 
 
-const otpRoutes = require("./routes/otp");
-app.use("/api/otp", otpRoutes);
+
 
 
 const signinRoute = require('./routes/signin');
 app.use('/api', signinRoute);
+
+const otpRoutes = require("./routes/auth");
+app.use("/api/otp", otpRoutes);
 
 const depositRoute = require("./routes/deposit");
 app.use("/api/deposit", depositRoute);

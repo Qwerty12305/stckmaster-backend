@@ -6,8 +6,7 @@ const AUTH_TOKEN = process.env.MESSAGECENTRAL_AUTH_TOKEN;
 const CUSTOMER_ID = process.env.MESSAGECENTRAL_CUSTOMER_ID;
 
 // Debug logs (optional)
-console.log("AUTH_TOKEN:", AUTH_TOKEN ? "Loaded ✅" : "Missing ❌");
-console.log("CUSTOMER_ID:", CUSTOMER_ID || "Missing ❌");
+
 
 // --------------------- SEND OTP ---------------------
 router.post("/send-otp", async (req, res) => {
