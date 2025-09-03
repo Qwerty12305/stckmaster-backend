@@ -46,11 +46,11 @@ router.get("/earnings/:userId", async (req, res) => {
 
     deposits.forEach((deposit, index) => {
       const percentage = index < 5 ? 0.05 : 0.07; // 5% for first 5, then 7%
-      const earning = deposit.amount * percentage;
+      const earning = deposit.realamount * percentage;
 
       rewardDetails.push({
         depositId: deposit._id,
-        amount: deposit.amount,
+        amount: deposit.realamount,
         rewardPercentage: percentage * 100,
         earning: parseFloat(earning.toFixed(2)),
       });
@@ -61,7 +61,7 @@ router.get("/earnings/:userId", async (req, res) => {
     res.json({
       referralCode,
       totalReferredUsers: deposits.length,
-      totalReferredAmount: deposits.reduce((acc, d) => acc + d.amount, 0),
+      totalReferredAmount: deposits.reduce((acc, d) => acc + d.realamount, 0),
       totalEarnings: parseFloat(totalEarnings.toFixed(2)),
       rewardDetails,
     });

@@ -66,6 +66,7 @@ router.post("/forgot-password", async (req, res) => {
 
 // --------------------- VERIFY OTP & RESET PASSWORD ---------------------
 router.post("/verify-forgot-otp", async (req, res) => {
+  
   let { mobileNumber, verificationId, code, newPassword } = req.body;
 
   if (!mobileNumber || !verificationId || !code || !newPassword) {

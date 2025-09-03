@@ -40,6 +40,7 @@ router.post("/", async (req, res) => {
     // Save the deposit
     const deposit = new Deposit({
       userId,
+      realamount: amount,
       amount: totalAmount, // amount + bonus if first deposit
       bonus: bonusAmount,   // optional field to track bonus separately
       utr,
