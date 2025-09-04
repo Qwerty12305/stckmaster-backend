@@ -60,7 +60,9 @@ router.get("/earnings/:userId", async (req, res) => {
 
     res.json({
       referralCode,
-      date: deposits.length > 0 ? deposits[0].createdAt : null,
+      date: deposits.length > 0 
+    ? new Date(deposits[0].createdAt).toISOString().split("T")[0] 
+    : null,
 
       totalReferredUsers: deposits.length,
       totalReferredAmount: deposits.reduce((acc, d) => acc + d.realamount, 0),
