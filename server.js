@@ -24,6 +24,10 @@ app.get('/', (req, res) => {
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/uploads/logos", express.static(path.join(__dirname, "uploads/logos")));
+
+
 
 app.use(cors({
   origin: ['http://localhost:5173', 'https://your-frontend.com'],
@@ -59,6 +63,13 @@ app.use('/api', signinRoute);
 
 const otpRoutes = require("./routes/auth");
 app.use("/api/otp", otpRoutes);
+
+const SupportContact = require("./routes/supportController");
+app.use("/api/support", SupportContact);
+
+const logoRouter = require("./routes/logoRouter");
+app.use("/api/logo", logoRouter);
+
 
 const depositRoute = require("./routes/deposit");
 app.use("/api/deposit", depositRoute);
