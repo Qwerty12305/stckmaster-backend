@@ -11,7 +11,7 @@ const Deposit = require('../models/Deposit');
 router.get("/users", async (req, res) => {
   try {
     // Fetch all users with selected fields including 'status'
-    const users = await User.find({}, "name mobile userId referralCode referredBy status").lean();
+    const users = await User.find({}, "name mobile userId referralCode referredBy status createdAt").lean();
 
     // Count totals
     const totalUsers = await User.countDocuments(); // ✅ Total number of users

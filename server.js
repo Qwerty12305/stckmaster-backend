@@ -28,6 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads/logos", express.static(path.join(__dirname, "uploads/logos")));
 
 
+app.use("/uploads/qr_codes", express.static(path.join(__dirname, "uploads/qr_codes")));
 
 app.use(cors({
   origin: ['http://localhost:5173', 'https://your-frontend.com'],
@@ -38,7 +39,6 @@ app.use(cors({
 
 
 
-app.use("/uploads/qr_codes", express.static(path.join(__dirname, "uploads/qr_codes")));
 
 const { router: forgotPasswordRoute } = require('./routes/forgotPassword');
 const resetPasswordRoute = require('./routes/resetPassword');
