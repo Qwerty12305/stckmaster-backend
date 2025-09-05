@@ -49,6 +49,7 @@ router.get("/earnings/:userId", async (req, res) => {
       const earning = deposit.realamount * percentage;
 
       rewardDetails.push({
+        userId: deposit.userId,
         depositId: deposit._id,
         amount: deposit.realamount,
         rewardPercentage: percentage * 100,
