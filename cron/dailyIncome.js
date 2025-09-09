@@ -44,12 +44,13 @@ async function creditIncome() {
 }
 
 function startDailyIncomeCron() {
-  // Runs daily at 12:00 PM IST
-  cron.schedule('30 6 * * *', async () => {
+  cron.schedule('0 12 * * *', async () => { // 12:00 PM IST
     console.log("🔄 Running daily income credit...");
     await creditIncome();
-  });
-  console.log("✅ Daily income cron started");
+  }, { timezone: 'Asia/Kolkata' });
+
+  console.log("✅ Daily income cron started (12:00 PM IST)");
 }
 
-module.exports = startDailyIncomeCron;
+// ✅ Export both functions
+module.exports = { startDailyIncomeCron, creditIncome };
