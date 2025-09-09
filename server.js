@@ -57,7 +57,7 @@ app.use("/api/user", authRoutes);
 
 
 app.use('/api/cron', require('./routes/cron'));
-startDailyIncomeCron();
+
 
 
 
