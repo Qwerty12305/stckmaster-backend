@@ -44,7 +44,7 @@ async function creditIncome() {
 }
 
 function startDailyIncomeCron() {
-  cron.schedule('0 12 * * *', async () => { // 12:00 PM IST
+  cron.schedule('0 12 * * 1-5', async () => { // 12:00 PM IST
     console.log("🔄 Running daily income credit...");
     await creditIncome();
   }, { timezone: 'Asia/Kolkata' });
