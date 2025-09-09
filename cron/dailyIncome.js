@@ -4,12 +4,13 @@ const InvestPlan = require('../models/Investplan');
 
 async function creditIncome() {
   try {
-    const now = moment().tz('Asia/Kolkata').toDate(); // use IST
+    const now = moment().tz('Asia/Kolkata').toDate(); // current IST
 
-    // 🔹 TEMPORARY: ignore nextCreditDate for testing
+    // ✅ Original query: only credit plans whose nextCreditDate has passed
     const plans = await InvestPlan.find({
       status: 'active',
-      $expr: { $lt: ['$creditedDays', '$duration'] } // only check creditedDays < duration
+      nextCreditDate: { $lte: now },
+      $expr: { $lt: ['$creditedDays', '$duration'] }
     });
 
     if (plans.length === 0) {
@@ -23,7 +24,7 @@ async function creditIncome() {
       plan.earnedIncome += plan.dailyIncome;
       plan.creditedDays += 1;
 
-      // Update nextCreditDate for cron continuity
+      // Move nextCreditDate to the next day at 12:00 PM IST
       plan.nextCreditDate = moment(plan.nextCreditDate)
         .tz('Asia/Kolkata')
         .add(1, 'day')
@@ -44,14 +45,13 @@ async function creditIncome() {
   }
 }
 
-
 function startDailyIncomeCron() {
-  cron.schedule('0 12 * * 1-5', async () => { // 12:00 PM IST
+  cron.schedule('0 12 * * 1-5', async () => { // Monday–Friday at 12:00 PM IST
     console.log("🔄 Running daily income credit...");
     await creditIncome();
   }, { timezone: 'Asia/Kolkata' });
 
-  console.log("✅ Daily income cron started (12:00 PM IST)");
+  console.log("✅ Daily income cron started (12:00 PM IST, Mon-Fri)");
 }
 
 // ✅ Export both functions
