@@ -22,7 +22,7 @@ const upload = multer({ storage });
 router.get("/all", async (req, res) => {
   try {
     const paymentMethods = await PaymentMethod.find();
-    console.log("Fetched payment methods:", paymentMethods); // Should show array with 1 element
+   // console.log("Fetched payment methods:", paymentMethods); // Should show array with 1 element
     res.json(paymentMethods); // <-- directly send array, not { paymentMethods }
   } catch (error) {
     console.error("Error fetching payment methods:", error);
