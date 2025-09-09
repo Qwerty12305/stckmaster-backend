@@ -7,7 +7,8 @@ const Investplan = require('./models/Investplan');  // adjust path as needed
 const paymentMethodRoutes = require("./routes/paymentRoutes"); // your new routes file
 const path = require("path");
 
-const startDailyIncomeCron = require("./cron/dailyIncome"); 
+const { startDailyIncomeCron } = require('./cron/dailyIncome');
+
 
 
 
@@ -56,6 +57,7 @@ app.use("/api/user", authRoutes);
 
 
 app.use('/api/cron', require('./routes/cron'));
+startDailyIncomeCron();
 
 
 
