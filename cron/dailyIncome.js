@@ -6,21 +6,15 @@ async function creditIncome() {
   try {
     const now = moment().tz('Asia/Kolkata').toDate(); // current IST
 
-    // ✅ Original query: only credit plans whose nextCreditDate has passed
     const plans = await InvestPlan.find({
       status: 'active',
       nextCreditDate: { $lte: now },
       $expr: { $lt: ['$creditedDays', '$duration'] }
     });
 
-    if (plans.length === 0) {
-      console.log(`[${now.toISOString()}] No plans to credit.`);
-      return;
-    }
+    if (plans.length === 0) return;
 
     for (const plan of plans) {
-      console.log(`Crediting plan ${plan._id}: Before creditedDays=${plan.creditedDays}, earnedIncome=${plan.earnedIncome}`);
-
       plan.earnedIncome += plan.dailyIncome;
       plan.creditedDays += 1;
 
@@ -33,12 +27,9 @@ async function creditIncome() {
 
       if (plan.creditedDays >= plan.duration) {
         plan.status = 'completed';
-        console.log(`Plan ${plan._id} completed.`);
       }
 
       await plan.save();
-
-      console.log(`After creditedDays=${plan.creditedDays}, earnedIncome=${plan.earnedIncome}, nextCreditDate=${plan.nextCreditDate}`);
     }
   } catch (err) {
     console.error('Error in creditIncome:', err);
@@ -47,12 +38,8 @@ async function creditIncome() {
 
 function startDailyIncomeCron() {
   cron.schedule('0 12 * * 1-5', async () => { // Monday–Friday at 12:00 PM IST
-    console.log("🔄 Running daily income credit...");
     await creditIncome();
   }, { timezone: 'Asia/Kolkata' });
-
-  console.log("✅ Daily income cron started (12:00 PM IST, Mon-Fri)");
 }
 
-// ✅ Export both functions
 module.exports = { startDailyIncomeCron, creditIncome };

@@ -48,7 +48,7 @@ router.post(
   async (req, res) => {
     try {
       const { method } = req.body;
-          console.log("Received method:", method);
+         // console.log("Received method:", method);
 
 
       let newEntry;
