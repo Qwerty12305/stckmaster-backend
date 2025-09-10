@@ -28,6 +28,25 @@ router.get("/all", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch payment methods" });
   }
 });
+router.get("/all/:id", async (req, res) => {
+  try {
+    const pm = await PaymentMethod.findById(req.params.id);
+    if (!pm) return res.status(404).json({ message: "Payment method not found" });
+    res.json(pm);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/all/:id", async (req, res) => { 
+  try { const pm = await PaymentMethod.findById(req.params.id); 
+    if (!pm) return 
+    res.status(404).json({ message: "Payment method not found" });
+     res.json(pm); } catch (error)
+      { console.error(error); res.status(500).json({ message: "Server error" }); 
+    
+    } });
 
 // Add payment method
 router.post("/add", upload.single("qrFile"), async (req, res) => {
