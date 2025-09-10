@@ -8,7 +8,8 @@ const fs = require("fs").promises;
 // Setup multer storage for QR/USDT image upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/qr_codes"); // ensure this folder exists
+        cb(null, "/home/bullgrow12/public_html/uploads/qr_codes"); // your actual path
+
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname)); // unique file name
@@ -153,4 +154,4 @@ router.delete("/delete/:id", async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = router;  
