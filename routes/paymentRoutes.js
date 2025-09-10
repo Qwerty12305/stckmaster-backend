@@ -1,73 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { v2: cloudinary } = require("cloudinary");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const PaymentMethod = require("../models/PaymentMethod");
-const fs = require("fs");
 const path = require("path");
+const PaymentMethod = require("../models/PaymentMethod");
+const fs = require("fs").promises;
 
-// ⚠️ Do NOT call cloudinary.config() if using CLOUDINARY_URL in env
-
-// Multer + Cloudinary storage
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "qr_codes",
-    format: async (_req, file) => file.mimetype.split("/")[1],
-    public_id: (_req, _file) => Date.now().toString(),
+// Setup multer storage for QR/USDT image upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/qr_codes"); // ensure this folder exists
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // unique file name
   },
 });
-
 const upload = multer({ storage });
 
-// ---------------------- POST add payment method ----------------------
-router.post("/add", upload.single("qrFile"), async (req, res) => {
-  try {
-    console.log("📥 Incoming request body:", req.body);
-    console.log("📁 Incoming file:", req.file);
-
-    const { method } = req.body;
-    const qrFileUrl = req.file ? req.file.path : null;
-
-    let newEntry;
-
-    switch (method) {
-      case "bank":
-        const { customerName, bankName, accountNumber, ifsc } = req.body;
-        newEntry = new PaymentMethod({
-          method,
-          bankData: { customerName, bankName, accountNumber, ifsc },
-        });
-        break;
-
-      case "qr":
-        const { upiId } = req.body;
-        if (!qrFileUrl) return res.status(400).json({ message: "QR file missing!" });
-        newEntry = new PaymentMethod({ method, qrData: { upiId, qrFile: qrFileUrl } });
-        break;
-
-      case "usdt":
-        const { network } = req.body;
-        if (!qrFileUrl) return res.status(400).json({ message: "USDT QR file missing!" });
-        newEntry = new PaymentMethod({ method, usdtData: { network, qrFile: qrFileUrl } });
-        break;
-
-      default:
-        return res.status(400).json({ message: "Invalid payment method" });
-    }
-
-    await newEntry.save();
-
-    console.log("✅ Uploaded to Cloudinary:", qrFileUrl);
-    return res.json({ message: "Payment method added successfully", data: newEntry });
-  } catch (err) {
-    console.error("❌ Error adding payment method:", err);
-    return res.status(500).json({ message: "Server error", error: err.message });
-  }
-});
-
-// ---------------------- GET all payment methods ----------------------
+// GET all payment methods
 router.get("/all", async (req, res) => {
   try {
     const paymentMethods = await PaymentMethod.find();
@@ -78,7 +27,7 @@ router.get("/all", async (req, res) => {
   }
 });
 
-// ---------------------- GET payment method by ID ----------------------
+// GET payment method by ID
 router.get("/all/:id", async (req, res) => {
   try {
     const pm = await PaymentMethod.findById(req.params.id);
@@ -90,7 +39,49 @@ router.get("/all/:id", async (req, res) => {
   }
 });
 
-// ---------------------- PUT update payment method ----------------------
+// POST add payment method
+router.post("/add", upload.single("qrFile"), async (req, res) => {
+  try {
+    const { method } = req.body;
+    let newEntry;
+
+    if (method === "bank") {
+      const { customerName, bankName, accountNumber, ifsc } = req.body;
+      newEntry = new PaymentMethod({
+        method,
+        bankData: { customerName, bankName, accountNumber, ifsc },
+      });
+    } else if (method === "qr") {
+      const { upiId } = req.body;
+      const qrFile = req.file ? req.file.filename : null;
+      newEntry = new PaymentMethod({
+        method,
+        qrData: { upiId, qrFile },
+      });
+    } else if (method === "usdt") {
+      const { network } = req.body;
+      const qrFile = req.file ? req.file.filename : null;
+      newEntry = new PaymentMethod({
+        method,
+        usdtData: { network, qrFile },
+      });
+    } else {
+      return res.status(400).json({ message: "Invalid payment method" });
+    }
+
+    await newEntry.save();
+    res.json({ message: "Payment method added successfully", data: newEntry });
+  } catch (err) {
+    console.error("Error adding payment method:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "Account Number already exists" });
+    }
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// PUT update payment method
+// PUT update payment method
 router.put("/update/:id", upload.single("qrFile"), async (req, res) => {
   try {
     const { id } = req.params;
@@ -99,7 +90,7 @@ router.put("/update/:id", upload.single("qrFile"), async (req, res) => {
     const existing = await PaymentMethod.findById(id);
     if (!existing) return res.status(404).json({ message: "Payment method not found" });
 
-    const updateData = { method };
+    const updateData = { method }; // <-- remove ": any"
 
     if (method === "bank") {
       const { customerName, bankName, accountNumber, ifsc } = req.body;
@@ -110,7 +101,7 @@ router.put("/update/:id", upload.single("qrFile"), async (req, res) => {
       const { upiId } = req.body;
       updateData.qrData = {
         upiId,
-        qrFile: req.file ? req.file.path : existing.qrData?.qrFile || null,
+        qrFile: req.file ? req.file.filename : existing.qrData?.qrFile || null,
       };
       updateData.bankData = undefined;
       updateData.usdtData = undefined;
@@ -118,7 +109,7 @@ router.put("/update/:id", upload.single("qrFile"), async (req, res) => {
       const { network } = req.body;
       updateData.usdtData = {
         network,
-        qrFile: req.file ? req.file.path : existing.usdtData?.qrFile || null,
+        qrFile: req.file ? req.file.filename : existing.usdtData?.qrFile || null,
       };
       updateData.bankData = undefined;
       updateData.qrData = undefined;
@@ -134,16 +125,25 @@ router.put("/update/:id", upload.single("qrFile"), async (req, res) => {
   }
 });
 
-// ---------------------- DELETE payment method ----------------------
+
+// DELETE payment method
 router.delete("/delete/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const methodToDelete = await PaymentMethod.findById(id);
     if (!methodToDelete) return res.status(404).json({ message: "Payment method not found" });
 
-    // ⚠️ If files were stored locally, you could delete them here.
-    // Since we use Cloudinary, files are automatically stored in cloud. 
-    // Optionally, you can delete from Cloudinary using cloudinary.uploader.destroy(public_id)
+    // Remove QR file if exists
+    if (methodToDelete.qrData?.qrFile) {
+      const qrPath = path.resolve(__dirname, "../uploads/qr_codes", methodToDelete.qrData.qrFile);
+      try { await fs.unlink(qrPath); } catch (err) { console.error("Failed to delete QR file:", err); }
+    }
+
+    // Remove USDT file if exists
+    if (methodToDelete.usdtData?.qrFile) {
+      const usdtPath = path.resolve(__dirname, "../uploads/qr_codes", methodToDelete.usdtData.qrFile);
+      try { await fs.unlink(usdtPath); } catch (err) { console.error("Failed to delete USDT QR file:", err); }
+    }
 
     await PaymentMethod.findByIdAndDelete(id);
     res.json({ message: "Payment method deleted" });
