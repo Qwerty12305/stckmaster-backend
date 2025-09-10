@@ -5,20 +5,15 @@ const { v2: cloudinary } = require("cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const PaymentMethod = require("../models/PaymentMethod");
 
-// Cloudinary config
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// ❌ remove cloudinary.config() — not needed when using CLOUDINARY_URL
 
 // Multer + Cloudinary storage
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "qr_codes",
-    format: async (_req, file) => file.mimetype.split("/")[1],
-    public_id: (_req, _file) => Date.now().toString(),
+    format: async (_req, file) => file.mimetype.split("/")[1], // keep original format (png/jpg/webp…)
+    public_id: (_req, _file) => Date.now().toString(), // unique name
   },
 });
 
@@ -28,7 +23,7 @@ const upload = multer({ storage });
 router.post("/add", upload.single("qrFile"), async (req, res) => {
   try {
     const { method } = req.body;
-    const qrFileUrl = req.file ? req.file.path : null; // Cloudinary URL
+    const qrFileUrl = req.file ? req.file.path : null; // Cloudinary URL auto-populated
 
     let newEntry;
 
@@ -40,22 +35,37 @@ router.post("/add", upload.single("qrFile"), async (req, res) => {
           bankData: { customerName, bankName, accountNumber, ifsc },
         });
         break;
+
       case "qr":
         const { upiId } = req.body;
-        newEntry = new PaymentMethod({ method, qrData: { upiId, qrFile: qrFileUrl } });
+        newEntry = new PaymentMethod({
+          method,
+          qrData: { upiId, qrFile: qrFileUrl },
+        });
         break;
+
       case "usdt":
         const { network } = req.body;
-        newEntry = new PaymentMethod({ method, usdtData: { network, qrFile: qrFileUrl } });
+        newEntry = new PaymentMethod({
+          method,
+          usdtData: { network, qrFile: qrFileUrl },
+        });
         break;
+
       default:
         return res.status(400).json({ message: "Invalid payment method" });
     }
 
     await newEntry.save();
-    return res.json({ message: "Payment method added successfully", data: newEntry });
+
+    console.log("✅ Uploaded to Cloudinary:", qrFileUrl); // <-- log the Cloudinary URL in console
+
+    return res.json({
+      message: "Payment method added successfully",
+      data: newEntry,
+    });
   } catch (err) {
-    console.error("Error adding payment method:", err);
+    console.error("❌ Error adding payment method:", err);
     return res.status(500).json({ message: "Server error", error: err.message });
   }
 });
