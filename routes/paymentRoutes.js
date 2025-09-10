@@ -1,20 +1,68 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
+const { v2: cloudinary } = require("cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const PaymentMethod = require("../models/PaymentMethod");
-const fs = require("fs").promises;
 
-// Setup multer storage for QR/USDT image upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/qr_codes"); // ensure this folder exists
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // unique file name
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Multer + Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "qr_codes",
+    format: async (_req, file) => file.mimetype.split("/")[1],
+    public_id: (_req, _file) => Date.now().toString(),
   },
 });
+
 const upload = multer({ storage });
+
+// POST add payment method
+router.post("/add", upload.single("qrFile"), async (req, res) => {
+  try {
+    const { method } = req.body;
+    const qrFileUrl = req.file ? req.file.path : null; // Cloudinary URL
+
+    let newEntry;
+
+    switch (method) {
+      case "bank":
+        const { customerName, bankName, accountNumber, ifsc } = req.body;
+        newEntry = new PaymentMethod({
+          method,
+          bankData: { customerName, bankName, accountNumber, ifsc },
+        });
+        break;
+      case "qr":
+        const { upiId } = req.body;
+        newEntry = new PaymentMethod({ method, qrData: { upiId, qrFile: qrFileUrl } });
+        break;
+      case "usdt":
+        const { network } = req.body;
+        newEntry = new PaymentMethod({ method, usdtData: { network, qrFile: qrFileUrl } });
+        break;
+      default:
+        return res.status(400).json({ message: "Invalid payment method" });
+    }
+
+    await newEntry.save();
+    return res.json({ message: "Payment method added successfully", data: newEntry });
+  } catch (err) {
+    console.error("Error adding payment method:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+
+
+
 
 // GET all payment methods
 router.get("/all", async (req, res) => {
@@ -39,46 +87,7 @@ router.get("/all/:id", async (req, res) => {
   }
 });
 
-// POST add payment method
-router.post("/add", upload.single("qrFile"), async (req, res) => {
-  try {
-    const { method } = req.body;
-    let newEntry;
 
-    if (method === "bank") {
-      const { customerName, bankName, accountNumber, ifsc } = req.body;
-      newEntry = new PaymentMethod({
-        method,
-        bankData: { customerName, bankName, accountNumber, ifsc },
-      });
-    } else if (method === "qr") {
-      const { upiId } = req.body;
-      const qrFile = req.file ? req.file.filename : null;
-      newEntry = new PaymentMethod({
-        method,
-        qrData: { upiId, qrFile },
-      });
-    } else if (method === "usdt") {
-      const { network } = req.body;
-      const qrFile = req.file ? req.file.filename : null;
-      newEntry = new PaymentMethod({
-        method,
-        usdtData: { network, qrFile },
-      });
-    } else {
-      return res.status(400).json({ message: "Invalid payment method" });
-    }
-
-    await newEntry.save();
-    res.json({ message: "Payment method added successfully", data: newEntry });
-  } catch (err) {
-    console.error("Error adding payment method:", err);
-    if (err.code === 11000) {
-      return res.status(400).json({ message: "Account Number already exists" });
-    }
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
 // PUT update payment method
 // PUT update payment method
