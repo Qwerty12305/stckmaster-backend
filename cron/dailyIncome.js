@@ -17,7 +17,9 @@ async function creditIncome() {
 
     for (const plan of plans) {
       // Credit daily income
-      plan.earnedIncome += plan.dailyIncome;
+       plan.earnedIncome = parseFloat(
+        (plan.earnedIncome + plan.dailyIncome).toFixed(2)
+      );
       plan.creditedDays += 1;
 
       // Move nextCreditDate to the next weekday at 12:00 PM IST
