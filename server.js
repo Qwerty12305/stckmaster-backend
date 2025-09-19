@@ -60,6 +60,8 @@ app.use('/api/cron', require('./routes/cron'));
 
 
 
+const contactRoutes = require("./routes/contact");
+app.use("/api/contact", contactRoutes);
 
 
 const signinRoute = require('./routes/signin');
