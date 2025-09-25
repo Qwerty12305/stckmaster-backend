@@ -44,13 +44,17 @@ app.use(cors({
 const { router: forgotPasswordRoute } = require('./routes/forgotPassword');
 const resetPasswordRoute = require('./routes/resetPassword');
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {
+  maxPoolSize: 10, // optional, for connection pooling
+})
   .then(() => {
-    console.log('✅ MongoDB connected');
-    startDailyIncomeCron(); // Start cron AFTER DB connect
+    console.log("✅ MongoDB connected");
+    startDailyIncomeCron();
   })
-  .catch(err => console.error('❌ MongoDB connection error:', err));
-
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
 
 const authRoutes = require("./routes/auth");
 app.use("/api/user", authRoutes);
