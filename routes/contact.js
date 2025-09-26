@@ -1,4 +1,3 @@
-// routes/contact.js
 const express = require("express");
 const router = express.Router();
 const Contact = require("../models/Contact");
@@ -22,5 +21,15 @@ router.post("/", async (req, res) => {
   }
 });
 
+// GET /api/contact  --> Fetch all contacts
+router.get("/", async (req, res) => {
+  try {
+    const contacts = await Contact.find().sort({ createdAt: -1 }); // latest first
+    return res.status(200).json(contacts);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;
