@@ -5,34 +5,33 @@ const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 
 router.post('/login', async (req, res) => {
-  const { mobile, password } = req.body;
+  console.log("RAW BODY:", req.body);
 
-  if (!mobile || !password) {
-    return res.status(400).json({ error: 'Mobile and password required' });
+  const mobile = req.body.mobile;
+  const password = req.body.password;
+
+  console.log("MOBILE TYPE:", typeof mobile);
+  console.log("MOBILE VALUE:", `[${mobile}]`);
+
+  const admin = await Admin.findOne({ mobile: mobile });
+
+  console.log("ADMIN FOUND:", admin);
+
+  if (!admin) {
+    return res.status(401).json({ error: "Admin not found" });
   }
 
-  try {
-    const admin = await Admin.findOne({ mobile });
-    if (!admin) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
+  const isMatch = await bcrypt.compare(password, admin.password);
 
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
+  console.log("PASSWORD MATCH:", isMatch);
 
-    // No JWT, just send a success message (or token if you want later)
-    res.status(200).json({
-      message: 'Login successful',
-      adminId: admin._id,
-      name: admin.name,
-      // optionally send a token or session ID if implemented
-    });
-  } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: 'Server error' });
+  if (!isMatch) {
+    return res.status(401).json({ error: "Wrong password" });
   }
+
+  res.json({ message: "Login success" });
 });
+
+
 
 module.exports = router;
