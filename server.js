@@ -44,8 +44,12 @@ app.use(cors({
 const { router: forgotPasswordRoute } = require('./routes/forgotPassword');
 const resetPasswordRoute = require('./routes/resetPassword');
 
+
+console.log("MONGO_URI EXISTS:", !!process.env.MONGO_URI);
+console.log("MONGO_URI START:", process.env.MONGO_URI?.slice(0, 20));
+
 mongoose.connect(process.env.MONGO_URI, {
-  maxPoolSize: 10, // optional, for connection pooling
+  maxPoolSize: 10, // optional, for connection pooling oknew tested
 })
   .then(() => {
     console.log("✅ MongoDB connected");
